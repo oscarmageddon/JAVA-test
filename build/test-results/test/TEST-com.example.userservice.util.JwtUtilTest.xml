@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.example.userservice.util.JwtUtilTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2025-08-13T16:57:39" hostname="MSI" time="0.073">
+  <properties/>
+  <testcase name="extractUsername_ValidToken_ReturnsUsername()" classname="com.example.userservice.util.JwtUtilTest" time="0.063"/>
+  <testcase name="validateToken_WrongUsername_ReturnsFalse()" classname="com.example.userservice.util.JwtUtilTest" time="0.002"/>
+  <testcase name="extractExpiration_ValidToken_ReturnsExpirationDate()" classname="com.example.userservice.util.JwtUtilTest" time="0.002"/>
+  <testcase name="validateToken_ValidToken_ReturnsTrue()" classname="com.example.userservice.util.JwtUtilTest" time="0.002"/>
+  <testcase name="generateToken_ValidUsername_ReturnsToken()" classname="com.example.userservice.util.JwtUtilTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

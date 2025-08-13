@@ -1,0 +1,9 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+project,com.example.userservice.validation,PasswordValidator,0,46,0,10,0,12,0,9,0,4
+project,com.example.userservice.validation,EmailValidator,0,19,0,4,0,4,0,6,0,4
+project,com.example.userservice.exception,UserNotFoundException,0,4,0,0,0,2,0,1,0,1
+project,com.example.userservice.exception,GlobalExceptionHandler,51,59,0,0,6,9,2,4,2,4
+project,com.example.userservice.exception,UserAlreadyExistsException,0,4,0,0,0,2,0,1,0,1
+project,com.example.userservice.util,JwtUtil,0,95,1,3,0,21,1,10,0,9
+project,com.example.userservice.controller,UserController,11,19,0,0,2,6,1,2,1,2
+project,com.example.userservice.service,UserService,0,198,0,6,0,42,0,11,0,8

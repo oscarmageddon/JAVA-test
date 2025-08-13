@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">project</a> &gt; <a href="index.source.html" class="el_package">com.example.userservice.service</a> &gt; <span class="el_source">UserService.java</span></div><h1>UserService.java</h1><pre class="source lang-java linenums">package com.example.userservice.service;
+
+import com.example.userservice.dto.PhoneDto;
+import com.example.userservice.dto.UserResponse;
+import com.example.userservice.dto.UserSignUpRequest;
+import com.example.userservice.entity.Phone;
+import com.example.userservice.entity.User;
+import com.example.userservice.exception.UserAlreadyExistsException;
+import com.example.userservice.exception.UserNotFoundException;
+import com.example.userservice.repository.UserRepository;
+import com.example.userservice.util.JwtUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@Service
+public class UserService {
+
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
+
+    @Autowired
+<span class="fc" id="L29">    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {</span>
+<span class="fc" id="L30">        this.userRepository = userRepository;</span>
+<span class="fc" id="L31">        this.passwordEncoder = passwordEncoder;</span>
+<span class="fc" id="L32">        this.jwtUtil = jwtUtil;</span>
+<span class="fc" id="L33">    }</span>
+
+    public UserResponse createUser(UserSignUpRequest request) {
+<span class="fc bfc" id="L36" title="All 2 branches covered.">        if (userRepository.existsByEmail(request.getEmail())) {</span>
+<span class="fc" id="L37">            throw new UserAlreadyExistsException(&quot;User already exists&quot;);</span>
+        }
+
+<span class="fc" id="L40">        List&lt;Phone&gt; phones = Optional.ofNullable(request.getPhones())</span>
+<span class="fc" id="L41">            .map(phoneList -&gt; phoneList.stream()</span>
+<span class="fc" id="L42">                .map(dto -&gt; new Phone(dto.getNumber(), dto.getCitycode(), dto.getContrycode()))</span>
+<span class="fc" id="L43">                .collect(Collectors.toList()))</span>
+<span class="fc" id="L44">            .orElse(null);</span>
+
+<span class="fc" id="L46">        User user = new User(request.getEmail(), passwordEncoder.encode(request.getPassword()), request.getName(), phones);</span>
+<span class="fc" id="L47">        String token = jwtUtil.generateToken(user.getEmail());</span>
+<span class="fc" id="L48">        user.setToken(token);</span>
+
+<span class="fc" id="L50">        User savedUser = userRepository.save(user);</span>
+<span class="fc" id="L51">        return mapToResponse(savedUser);</span>
+    }
+
+    public UserResponse loginUser(String token) {
+<span class="fc" id="L55">        String email = jwtUtil.extractUsername(token);</span>
+<span class="fc bfc" id="L56" title="All 2 branches covered.">        if (!jwtUtil.validateToken(token, email)) {</span>
+<span class="fc" id="L57">            throw new UserNotFoundException(&quot;Invalid token&quot;);</span>
+        }
+
+<span class="fc" id="L60">        User user = userRepository.findByEmail(email)</span>
+<span class="fc" id="L61">            .orElseThrow(() -&gt; new UserNotFoundException(&quot;User not found&quot;));</span>
+
+        // Generate new token and update last login
+<span class="fc" id="L64">        String newToken = jwtUtil.generateToken(user.getEmail());</span>
+<span class="fc" id="L65">        user.setToken(newToken);</span>
+<span class="fc" id="L66">        user.setLastLogin(LocalDateTime.now());</span>
+        
+<span class="fc" id="L68">        User updatedUser = userRepository.save(user);</span>
+<span class="fc" id="L69">        return mapToResponse(updatedUser);</span>
+    }
+
+    private UserResponse mapToResponse(User user) {
+<span class="fc" id="L73">        UserResponse response = new UserResponse();</span>
+<span class="fc" id="L74">        response.setId(user.getId());</span>
+<span class="fc" id="L75">        response.setCreated(user.getCreated());</span>
+<span class="fc" id="L76">        response.setLastLogin(user.getLastLogin());</span>
+<span class="fc" id="L77">        response.setToken(user.getToken());</span>
+<span class="fc" id="L78">        response.setIsActive(user.getIsActive());</span>
+<span class="fc" id="L79">        response.setName(user.getName());</span>
+<span class="fc" id="L80">        response.setEmail(user.getEmail());</span>
+<span class="fc" id="L81">        response.setPassword(user.getPassword());</span>
+
+<span class="fc bfc" id="L83" title="All 2 branches covered.">        if (user.getPhones() != null) {</span>
+<span class="fc" id="L84">            List&lt;PhoneDto&gt; phoneDtos = user.getPhones().stream()</span>
+<span class="fc" id="L85">                .map(phone -&gt; new PhoneDto(phone.getNumber(), phone.getCitycode(), phone.getContrycode()))</span>
+<span class="fc" id="L86">                .collect(Collectors.toList());</span>
+<span class="fc" id="L87">            response.setPhones(phoneDtos);</span>
+        }
+
+<span class="fc" id="L90">        return response;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>
